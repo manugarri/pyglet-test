@@ -2,9 +2,6 @@ import pyglet
 
 pyglet.resource.path = ['game/resources']
 pyglet.resource.reindex()
-#TEXTURE_PATH = 'tiles.png'
-# A TextureGroup manages an OpenGL texture.
-#tile_texture = TextureGroup(image.load(TEXTURE_PATH).get_texture())
 
 i = pyglet.resource.image
 
@@ -23,7 +20,9 @@ def center_image(image):
 
 AGENT_IMAGES = {
  'knight': i('knight.png'),
- 'player': i('player.png')
+ 'peasant': i('peasant.png'),
+ 'goblin': i('goblin.png'),
+ 'chest': i('chest.png')
 }
 
 map(center_image, AGENT_IMAGES.values())

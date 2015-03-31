@@ -3,7 +3,7 @@ Attempt to make a dungeon rpg by reading the least amount of documentation. What
 
 ###Why?
 
-For two reasons:
+For three reasons:
 
 1. The embarrasing lack of proper documentation for [pyglet](http://www.pyglet.org/documentation.html)
 2. Because trying on my own might find good solutions that wouldn't exist otherwise if followed best practices since day 0

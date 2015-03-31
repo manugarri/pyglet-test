@@ -9,37 +9,14 @@ import numpy as np
 
 from resources import TILE_IMAGES
 from load import background
+from level_templates import templates
 
 LEVEL_ROWS = 10
 LEVEL_COLUMNS = 15
 TILE_SIZE = 50 #50 by 50 px block
+GAME_HEIGHT = LEVEL_ROWS * TILE_SIZE
+GAME_WIDTH = LEVEL_COLUMNS * TILE_SIZE
 
-
-level_layout='''
-#.#.#.#.#.#.#.#.#.#.#.#.#.#.#
-#. . . . . . . . . . . . . .2
-#. .#.#.#.#.#. . . . . . . .#
-#. .#. . . . . . . . . . . .#
-#. .#. . . . . . . . . . . .#
-#.#.#. . . . . . . . . . . .#
-#. . . . . . . . . . . . . .#
-#. .#. . . . . . . . . . . .#
-#. .#. . . . . . . . . . . .#
-#.1.#.#.#.#.#.#.#.#.#.#.#.#.#
-'''
-
-level_objects='''
-#.#.#.#.#.#.#.#.#.#.#.#.#.#.#
-#. . . . . . . . . . . . . .2
-#. .#.#.#.#.#. . . . . . .G.#
-#. .#. . . . . . . . . . . .#
-#.C.#. . . . . . . . . . . .#
-#.#.#. . . . . . . . . . . .#
-#. . . . . . . . . . . . .O.#
-#. .#. . . . . . . . . . .O.#
-#. .#. . . . . . . . . . . .#
-#.1.#.#.#.#.#.#.#.#.#.#.#.#.#
-'''
 TEMPLATE_SYMBOLS = {
  '#': 'wall',
  ' ': 'floor',
@@ -54,11 +31,20 @@ def parse_template(level_template):
 
 class Level(object):
     '''the level object, it has many tiles'''
-    def __init__(self, level_template, batch, *args, **kwargs):
+    def __init__(self, number, batch, *args, **kwargs):
+        self.number = number
+        self.load_template()
+        #self.template = templates['level_{}'.format(self.number)]
+        #self.victory_conditions = self.template['victory_conditions']
+        #self._layout = parse_template(self.template['layout'])
         self.tiles = []
         self.layout = []
-        self._layout = parse_template(level_template)
         self.read_template(batch)
+
+    def load_template(self):
+        template = templates['level_{}'.format(self.number)]
+        self.victory_conditions = template['victory_conditions']
+        self._layout = parse_template(template['layout'])
 
     def read_template(self, batch):
         '''Parses the template'''
@@ -84,7 +70,7 @@ class Level(object):
 
 class Tile(pyglet.sprite.Sprite):
     '''A Level tile has the sprite data'''
-    def __init__(self, x, y, tile_type, batch, *args, **kwargs):
+    def __init__(self, x, y, tile_type, batch, group=background, *args, **kwargs):
         self.tile_type = tile_type
         tile_image = TILE_IMAGES[tile_type]
         self.pos_x = x
