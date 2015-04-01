@@ -2,7 +2,9 @@ TEMPLATE_SYMBOLS = {
  '#': 'wall',
  ' ': 'floor',
  '1': 'entrance',
- '2': 'exit'
+ '2': 'exit',
+ 'C':'chest',
+ 'g': 'goblin'
 }
 
 AGENT_SYMBOLS = {

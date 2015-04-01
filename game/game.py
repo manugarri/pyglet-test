@@ -2,7 +2,7 @@ import pyglet
 
 from level import Level
 from constants import GAME_WIDTH
-from agents import Player
+from agents import Player, AGENTS_CLASSES
 
 class Game(object):
     '''main game class'''
@@ -10,7 +10,7 @@ class Game(object):
         self.level_number = 0
         self.level = Level(self.level_number, level_batch)
         self.batch = main_batch
-        self.agents = self.level.load_agents()
+        self.agents = self.level.load_agents(AGENTS_CLASSES, main_batch)
         self.register_dispatchers(self.agents)
 
         player_x, player_y = self.level.find('entrance')
