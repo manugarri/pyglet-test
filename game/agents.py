@@ -5,7 +5,7 @@ import pyglet
 from pyglet.window import key
 
 from resources import AGENT_IMAGES
-from level import LEVEL_ROWS, LEVEL_COLUMNS, TILE_SIZE
+from constants import LEVEL_ROWS, LEVEL_COLUMNS, TILE_SIZE
 from load import foreground
 
 class Agent(pyglet.sprite.Sprite):
@@ -18,7 +18,11 @@ class Agent(pyglet.sprite.Sprite):
         self.initial_moves = 5
         self.moves = 5
         self.level = level
-        self.notifications = []
+        self.dispatcher = pyglet.event.EventDispatcher()
+        self.dispatcher.register_event_type('display_notifications')
+
+    def notify(self, message):
+        self.dispatcher.dispatch_event('display_notifications', [message])
 
     def calculate_render_position(self):
         self.x = self.pos_x* TILE_SIZE + TILE_SIZE/2.0
@@ -78,7 +82,6 @@ class Player(object):
             Knight(*args, **kwargs)
         ])
         self.avatar = self._avatars[0]
-        self.notifications = []
 
     def sleep(self):
         time.sleep(0.2)
@@ -86,23 +89,23 @@ class Player(object):
     def update(self, dt):
         if self.key_handler[key.LEFT]:
             self.avatar.move_left()
-            self.notifications.append('{} moves left {}'.format(self.avatar.name, self.avatar.moves))
+            self.avatar.notify('{} moves left {}'.format(self.avatar.name, self.avatar.moves))
             self.sleep()
         elif self.key_handler[key.RIGHT]:
             self.avatar.move_right()
-            self.notifications.append('{} moves left {}'.format(self.avatar.name, self.avatar.moves))
+            self.avatar.notify('{} moves left {}'.format(self.avatar.name, self.avatar.moves))
             self.sleep()
         elif self.key_handler[key.UP]:
             self.avatar.move_up()
-            self.notifications.append('{} moves left {}'.format(self.avatar.name, self.avatar.moves))
+            self.avatar.notify('{} moves left {}'.format(self.avatar.name, self.avatar.moves))
             self.sleep()
         elif self.key_handler[key.DOWN]:
             self.avatar.move_down()
-            self.notifications.append('{} moves left {}'.format(self.avatar.name, self.avatar.moves))
+            self.avatar.notify('{} moves left {}'.format(self.avatar.name, self.avatar.moves))
             self.sleep()
         elif self.key_handler[key.SPACE]:
             self.change_avatar()
-            self.notifications.append('{} Selected'.format(self.avatar.name))
+            self.avatar.notify('{} moves left {}'.format(self.avatar.name, self.avatar.moves))
             self.sleep()
         self.avatar.update(dt)
         self.check_position()
@@ -130,8 +133,20 @@ class Knight(Agent):
         super(Knight, self).__init__(img=AGENT_IMAGES['knight'], *args, **kwargs)
         self.name = 'Knight'
 
-class Orc(Agent):
-    '''The knight has a good health/power ratio'''
+class Goblin(Agent):
+    '''Weakest of all mobs.'''
     def __init__(self, *args, **kwargs):
-        super(Knight, self).__init__(img=AGENT_IMAGES['orc'], *args, **kwargs)
-        self.name = 'Orc'
+        super(Goblin, self).__init__(img=AGENT_IMAGES['goblin'], *args, **kwargs)
+        self.name = 'Goblin'
+
+class Chest(Agent):
+    '''A chest'''
+    def __init__(self, *args, **kwargs):
+        super(Chest, self).__init__(img=AGENT_IMAGES['chest'], *args, **kwargs)
+        self.name = 'Chest'
+        self.moves=0
+
+AGENTS_CLASSES = {
+'chest': Chest,
+'goblin': Goblin
+    }

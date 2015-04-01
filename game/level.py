@@ -9,22 +9,10 @@ import numpy as np
 
 from resources import TILE_IMAGES
 from load import background
-from level_templates import templates
+from level_templates import templates, TEMPLATE_SYMBOLS, AGENT_SYMBOLS
+from constants import TILE_SIZE
 
-LEVEL_ROWS = 10
-LEVEL_COLUMNS = 15
-TILE_SIZE = 50 #50 by 50 px block
-GAME_HEIGHT = LEVEL_ROWS * TILE_SIZE
-GAME_WIDTH = LEVEL_COLUMNS * TILE_SIZE
-
-TEMPLATE_SYMBOLS = {
- '#': 'wall',
- ' ': 'floor',
- '1': 'entrance',
- '2': 'exit'
-}
-
-def parse_template(level_template):
+def parse_template(level_template, symbols_map=TEMPLATE_SYMBOLS):
     for key, value in TEMPLATE_SYMBOLS.items():
         level_template = level_template.replace(key, value)
     return level_template
@@ -34,9 +22,6 @@ class Level(object):
     def __init__(self, number, batch, *args, **kwargs):
         self.number = number
         self.load_template()
-        #self.template = templates['level_{}'.format(self.number)]
-        #self.victory_conditions = self.template['victory_conditions']
-        #self._layout = parse_template(self.template['layout'])
         self.tiles = []
         self.layout = []
         self.read_template(batch)
@@ -45,6 +30,7 @@ class Level(object):
         template = templates['level_{}'.format(self.number)]
         self.victory_conditions = template['victory_conditions']
         self._layout = parse_template(template['layout'])
+        self._agent_layout = parse_template(template['agents'], symbols_map=AGENT_SYMBOLS)
 
     def read_template(self, batch):
         '''Parses the template'''
@@ -67,6 +53,11 @@ class Level(object):
     def get_tile_type(self, x, y):
         '''returns the level tile_type of the pos x,y'''
         return self.layout[x, y]
+
+    def load_agents(self):
+        agent_symbols = AGENT_SYMBOLS.keys()
+        return []
+
 
 class Tile(pyglet.sprite.Sprite):
     '''A Level tile has the sprite data'''

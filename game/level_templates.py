@@ -1,3 +1,15 @@
+TEMPLATE_SYMBOLS = {
+ '#': 'wall',
+ ' ': 'floor',
+ '1': 'entrance',
+ '2': 'exit'
+}
+
+AGENT_SYMBOLS = {
+  'C':'chest',
+  'g': 'goblin'
+}
+
 templates = {
         'level_0':{
 'layout':'''
@@ -13,7 +25,7 @@ templates = {
 #.1.#.#.#.#.#.#.#.#.#.#.#.#.#
 ''',
 
-'objects':'''
+'agents':'''
 #.#.#.#.#.#.#.#.#.#.#.#.#.#.#
 #. . . . . . . . . . . . . . 
 #. .#.#.#.#.#. . . . . . . .#
