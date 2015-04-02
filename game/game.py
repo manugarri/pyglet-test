@@ -45,17 +45,9 @@ class Game(object):
         level_info['agents'] = np.zeros(shape=(LEVEL_COLUMNS, LEVEL_ROWS)).tolist()
         level_info['avatars'] = np.zeros(shape=(LEVEL_COLUMNS, LEVEL_ROWS)).tolist()
         for agent in self.agents:
-           level_info['agents'][agent.pos_x][agent.pos_y] = {
-                'name': agent.name,
-                'pos_x': agent.pos_x,
-                'pos_y': agent.pos_y
-                }
+           level_info['agents'][agent.pos_x][agent.pos_y] = agent
         for avatar in self.player._avatars:
-           level_info['avatars'][avatar.pos_x][avatar.pos_y] = {
-                'name': avatar.name,
-                'pos_x': avatar.pos_x,
-                'pos_y': avatar.pos_y
-                }
+            level_info['avatars'][avatar.pos_x][avatar.pos_y] = avatar
         for agent in self.agents + list(self.player._avatars):
             agent.level_info = level_info
 

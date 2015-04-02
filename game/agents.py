@@ -9,28 +9,41 @@ from constants import LEVEL_ROWS, LEVEL_COLUMNS, TILE_SIZE
 from load import foreground
 
 class Agent(pyglet.sprite.Sprite):
-    '''Basic agent class. Anything that moves and reacts'''
+    #Basic agent class. Anything that interacts
     def __init__(self, x, y, level, *args, **kwargs):
         super(Agent, self).__init__(x=x, y=y, group=foreground, *args, **kwargs)
+        self.name = 'Stuff'
+        self.side = 'neutral' #only 3 sides, good (avatars), bad (monsters) and neutral (chests)
         self.pos_x = x
         self.pos_y = y
         self.calculate_render_position()
-        self.initial_moves = 5
-        self.moves = 5
         self.level = level
         self.dispatcher = pyglet.event.EventDispatcher()
         self.dispatcher.register_event_type('display_notifications')
         self.level_info = []
+        self.health = 1
 
     def notify(self, message):
+        '''adds a text notification on the window'''
         self.dispatcher.dispatch_event('display_notifications', [message])
 
     def calculate_render_position(self):
+        '''Converts from the tiles to screen pixels'''
         self.x = self.pos_x* TILE_SIZE + TILE_SIZE/2.0
         self.y = self.pos_y*TILE_SIZE + TILE_SIZE/2.0
 
+    def update(self, dt):
+        self.calculate_render_position()
+
+class ActiveAgent(Agent):
+    def __init__(self, *args, **kwargs):
+        '''Agent that moves, thinks and attacks'''
+        super(ActiveAgent, self).__init__(*args, **kwargs)
+        self.initial_moves = 5
+        self.moves = 5
+
     def valid_move(self, direction):
-        '''checks if the tile the agent is tryong to moving to is a valid tile'''
+        #checks if the tile the agent is tryong to moving to is a valid tile
         to_x = self.pos_x
         to_y = self.pos_y
         if direction == 'right':
@@ -74,10 +87,6 @@ class Agent(pyglet.sprite.Sprite):
 
     def check_position(self):
         pass
-
-    def update(self, dt):
-        self.calculate_render_position()
-        self.check_position()
 
 class Player(object):
     '''The player basic character'''
@@ -127,30 +136,36 @@ class Player(object):
         self._avatars.rotate()
         self.avatar = self._avatars[0]
 
-class Peasant(Agent):
+class Peasant(ActiveAgent):
     '''Basic player avatar'''
     def __init__(self, *args, **kwargs):
         super(Peasant, self).__init__(img=AGENT_IMAGES['peasant'], *args, **kwargs)
         self.name = 'Peasant'
+        self.moves = 100
+        self.health = 3
+        self.side = 'good' #good only attacks evil or neutral
 
-class Knight(Agent):
+class Knight(ActiveAgent):
     '''The knight has a good health/power ratio'''
     def __init__(self, *args, **kwargs):
         super(Knight, self).__init__(img=AGENT_IMAGES['knight'], *args, **kwargs)
         self.name = 'Knight'
+        self.moves = 1000
+        self.side = 'good' #good only attacks evil or neutral
+        self.health = 5
 
-class Goblin(Agent):
+class Goblin(ActiveAgent):
     '''Weakest of all mobs.'''
     def __init__(self, *args, **kwargs):
         super(Goblin, self).__init__(img=AGENT_IMAGES['goblin'], *args, **kwargs)
         self.name = 'Goblin'
+        self.side = 'evil' #good only attacks evil or neutral
 
 class Chest(Agent):
     '''A chest'''
     def __init__(self, *args, **kwargs):
         super(Chest, self).__init__(img=AGENT_IMAGES['chest'], *args, **kwargs)
         self.name = 'Chest'
-        self.moves=0
 
 AGENTS_CLASSES = {
 'chest': Chest,
