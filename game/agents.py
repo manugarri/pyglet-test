@@ -20,6 +20,7 @@ class Agent(pyglet.sprite.Sprite):
         self.level = level
         self.dispatcher = pyglet.event.EventDispatcher()
         self.dispatcher.register_event_type('display_notifications')
+        self.level_info = []
 
     def notify(self, message):
         self.dispatcher.dispatch_event('display_notifications', [message])
@@ -40,7 +41,12 @@ class Agent(pyglet.sprite.Sprite):
             to_y += 1
         elif direction == 'down':
             to_y -= 1
-        return self.level.tiles[to_x, to_y].tile_type in ['floor','exit']
+        if self.level.tiles[to_x, to_y].tile_type in ['floor','exit'] and\
+                self.level_info['agents'][to_x][to_y]==0 and\
+                self.level_info['avatars'][to_x][to_y]==0:
+            return True
+        else:
+            return False
 
     def move_right(self):
         self.rotation = 270
