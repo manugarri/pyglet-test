@@ -15,12 +15,7 @@ def on_draw():
     game_window.clear()
     for batch in BATCHES:
         batch.draw()
-    #level_batch.draw()
-    #main_batch.draw()
-    #import ipdb; ipdb.set_trace()
-
-
 
 if __name__ == '__main__':
-    pyglet.clock.schedule_interval(game.update, 1/60.0)#/60.0)
+    pyglet.clock.schedule_interval(game.update, 1/60.0)
     pyglet.app.run()

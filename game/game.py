@@ -6,31 +6,38 @@ from level import Level
 from constants import GAME_WIDTH, LEVEL_ROWS, LEVEL_COLUMNS
 from agents import Player, AGENTS_CLASSES
 from resources import VisibleElement, FX
-from load import animation_batch
+from load import level_batch, animation_batch, main_batch
 
 class Game(object):
     '''main game class'''
     def __init__(self, level_batch, main_batch, animation_batch):
         self.level_number = 0
-        self.turn = 0
-        self.turn_side = 'evil' #good guys start first
-        self.animations = []
-        self.level = Level(self.level_number, level_batch)
         self.batch = main_batch
-        self.agents = self.level.load_agents(AGENTS_CLASSES, main_batch)
-        player_x, player_y = self.level.find('entrance')
-        player = Player(x=player_x, y=player_y, level=self.level, batch=self.batch)
-        self.player = player
-
-        self.register_dispatchers()
         self.label = pyglet.text.Label(text="Game started", x=GAME_WIDTH/2.0,
-                y=5, anchor_x='center', batch=self.batch)
-        self.reset_turn()
+                y=5, anchor_x='center', batch=main_batch)
+        self.load_level()
 
     def load_level(self):
-        self.level = Level(self.level_number, self.batch)
-        self.player.pos_x, self.pos_y = self.level.find('entrance')
-        self.agents = [self.player]
+        self.turn = 0
+        self.turn_side = 'good' #good guys start first
+        self.animations = []
+        self.level = Level(self.level_number, level_batch)
+        self.agents = self.level.load_agents(AGENTS_CLASSES, main_batch)
+        self.load_player()
+        self.register_dispatchers()
+        self.level_number +=1
+
+    def load_player(self):
+        '''Creates the player or if already exists,reset the avatars location'''
+        player_x, player_y = self.level.find('entrance')
+        if hasattr(self,'player'):
+            for avatar in self.player._avatars:
+                avatar.pos_x = player_x
+                avatar.pos_y = player_y
+                avatar.level = self.level
+        else:
+            player = Player(avatars=self.level.avatars, x=player_x, y=player_y, level=self.level, batch=main_batch)
+            self.player = player
 
     def register_dispatchers(self):
         for agent in self.agents:
@@ -70,6 +77,7 @@ class Game(object):
                 self.reset_turn()
 
         self.update_agents_level_info()
+        self.check_victory()
 
     def update_agents_level_info(self):
         '''updates agents knowledge of other level agents, events,etc'''
@@ -93,20 +101,38 @@ class Game(object):
     def animation(self, animations):
         animation = animations[0]
         animation = VisibleElement(img=FX[animation['name']], x=animation['x'],
-                y=animation['y'], batch=animation_batch)
+                                   y=animation['y'], batch=animation_batch)
         self.animations.append(animation)
 
     def reset_turn(self):
+        print('reset turn')
         self.turn += 1
         if self.turn_side == 'evil':
             self.turn_side = 'good'
         else:
             self.turn_side = 'evil'
+        print(self.turn_side)
         self.display_notifications(['Turn of the {} guys'.format(self.turn_side)])
         for agent in self.agents + list(self.player._avatars):
             agent.reset_moves()
 
     def player_event(self, event_type):
+        print('\nplayer event: {}\n'.format(event_type[0]))
         event_type = event_type[0]
         if event_type == 'end_turn':
             self.reset_turn()
+
+    def check_victory(self):
+        if self.victory_condition():
+            print('victory')
+            self.display_notifications(['You win!'])
+            time.sleep(0.5)
+            self.load_level()
+
+    def victory_condition(self):
+        for condition in self.level.victory_conditions:
+            if condition == 'kill':
+                return len([agent for agent in self.agents if agent.side == 'evil'])<=0
+            elif condition == 'exit':
+                return len([a for a in self.player._avatars if
+                            self.level.tiles[a.pos_x][a.pox_y].tile_type =='exit'])>=0

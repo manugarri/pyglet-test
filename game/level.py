@@ -31,6 +31,7 @@ class Level(object):
         self.victory_conditions = template['victory_conditions']
         self._layout = parse_template(template['layout'])
         self._agent_layout = parse_template(template['agents'])
+        self.avatars = template['avatars']
 
     def read_template(self, batch):
         '''Parses the template'''

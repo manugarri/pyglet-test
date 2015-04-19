@@ -9,19 +9,19 @@ from constants import LEVEL_ROWS, LEVEL_COLUMNS
 
 def agents_distance(x1,y1, x2, y2):
     '''returns the distance (in legal movements) between two elements in the level'''
-    return abs(x1-x2) + abs(y1-y2) 
+    return abs(x1-x2) + abs(y1-y2)
 
 class Agent(VisibleElement):
     #Basic Agent class
     def __init__(self, x, y, level, *args, **kwargs):
         super(Agent, self).__init__(x=x, y=y, *args, **kwargs)
         self.name = 'Stuff'
-        self.side = 'evil' #only 3 sides, good (avatars), bad (monsters) and neutral (chests)
+        self.side = 'neutral' #only 3 sides, good (avatars), bad (monsters) and neutral (chests)
         self.level = level
         self.dispatcher = pyglet.event.EventDispatcher()
         self.dispatcher.register_event_type('display_notifications')
         self.dispatcher.register_event_type('animation')
-        self.level_info = []
+        self.level_info = {}
         self.health = 1
 
     def notify(self, message):
@@ -41,7 +41,6 @@ class ActiveAgent(Agent):
         super(ActiveAgent, self).__init__(*args, **kwargs)
         self.turn_moves = 0
         self.power = 0
-        self.reset_moves()
 
     def reset_moves(self):
         self.moves = self.turn_moves
@@ -128,6 +127,7 @@ class BasicMob(ActiveAgent):
         #'range_combat':[escape_if_too_close, get_shoot_range, shoot]
         self.personality = 'close_combat'
         self.side = 'evil' #good only attacks evil or neutral
+        self.reset_moves()
 
     def take_action(self):
         '''decides what to do based on mob personality'''
@@ -136,7 +136,7 @@ class BasicMob(ActiveAgent):
 
     def find_nearest_enemy(self):
         '''returns location of nearest enemy. If tie returns a random one'''
-        enemies = [agent for agent in self.level_info['agents_list'] if agent.side != self.side]
+        enemies = [agent for agent in self.level_info['agents_list'] if agent.side != self.side and agent.side!='neutral']
         enemies_distances = [agents_distance(self.pos_x, self.pos_y,
                            enemy.pos_x, enemy.pos_y) for enemy in enemies]
         closest_distance = min(enemies_distances)
@@ -153,16 +153,15 @@ class BasicMob(ActiveAgent):
         for direction in ['left','right','up','down']:
             valid_move, to_x, to_y = self.valid_move(direction)
             if valid_move and agents_distance(to_x, to_y, target.pos_x, target.pos_y) < \
-                    agents_distance( self.pos_x, self.pos_y, target.pos_x, target.pos_y): 
-                eval('self.move_{}()'.format(direction))    
+                    agents_distance( self.pos_x, self.pos_y, target.pos_x, target.pos_y):
+                eval('self.move_{}()'.format(direction))
                 return None
-        print('{} change orientation'.format(self.name))
         #change orientation when mob is next to avatar
-        if to_y > self.pos_y:
+        if target.pos_y > self.pos_y:
             self.move_up()
-        elif to_y < self.pos_y:
+        elif target.pos_y < self.pos_y:
             self.move_down()
-        elif to_x > self.pos_x:
+        elif target.pos_x > self.pos_x:
             self.move_right()
         else:
             self.move_left()
@@ -177,7 +176,7 @@ class BasicMob(ActiveAgent):
         return False
 
     def escape_if_too_close(self):
-        '''the mob escapes if its within 3 movement blocks it will move on the 
+        '''the mob escapes if its within 3 movement blocks it will move on the
         opposite direction'''
 
     '''
@@ -187,12 +186,10 @@ class BasicMob(ActiveAgent):
     '''
 class Player(object):
     '''The player basic character'''
-    def __init__(self, *args, **kwargs):
+    def __init__(self, avatars, *args, **kwargs):
         self.key_handler = key.KeyStateHandler()
-        self._avatars = deque([
-            Peasant(*args, **kwargs),
-            Knight(*args, **kwargs)
-        ])
+        self._avatars = [AVATARS_CLASSES[avatar](*args, **kwargs) for avatar in avatars]
+        self._avatars = deque(self._avatars)
         self.avatar = self._avatars[0]
         self.dispatcher = pyglet.event.EventDispatcher()
         self.dispatcher.register_event_type('player_event')
@@ -246,6 +243,7 @@ class Peasant(ActiveAgent):
         self.turn_moves = 4
         self.health = 3
         self.power = 1
+        self.reset_moves()
 
 class Knight(ActiveAgent):
     '''The knight has a good health/power ratio'''
@@ -256,6 +254,7 @@ class Knight(ActiveAgent):
         self.turn_moves = 3
         self.health = 5
         self.power = 2
+        self.reset_moves()
 
 class Goblin(BasicMob):
     '''Weakest of all mobs.'''
@@ -276,3 +275,8 @@ AGENTS_CLASSES = {
 'chest': Chest,
 'goblin': Goblin
     }
+
+AVATARS_CLASSES = {
+'peasant': Peasant,
+'knight': Knight
+}
