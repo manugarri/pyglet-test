@@ -195,7 +195,7 @@ class Player(object):
         self.dispatcher.register_event_type('player_event')
 
     def sleep(self):
-        time.sleep(0.2)
+        time.sleep(0.1)
         pass
 
     def update(self, turn_side, dt):
@@ -219,6 +219,8 @@ class Player(object):
         elif self.key_handler[key.A]:
             self.avatar.attack()
         elif self.key_handler[key.ENTER]:
+            print('\nkey enter pressed\n')
+            self.sleep()
             self.dispatcher.dispatch_event('player_event', ['end_turn'])
         self.avatar.update(dt)
         self.check_position()
@@ -270,6 +272,7 @@ class Chest(ActiveAgent):
     def __init__(self, *args, **kwargs):
         super(Chest, self).__init__(img=AGENT_IMAGES['chest'], *args, **kwargs)
         self.name = 'Chest'
+        self.moves = 0
 
 AGENTS_CLASSES = {
 'chest': Chest,

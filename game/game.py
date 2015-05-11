@@ -18,14 +18,22 @@ class Game(object):
         self.load_level()
 
     def load_level(self):
+        print('\n\n****************\nLOAD LEVEL********\n')
         self.turn = 0
-        self.turn_side = 'good' #good guys start first
+        self.turn_side = 'evil' #good guys start first
         self.animations = []
         self.level = Level(self.level_number, level_batch)
         self.agents = self.level.load_agents(AGENTS_CLASSES, main_batch)
         self.load_player()
         self.register_dispatchers()
         self.level_number +=1
+        self.reset_turn()
+
+    def check_moves(self):
+        for agent in self.agents:
+            print('{} MOVES: {}'.format(agent.name, agent.moves))
+        for avatar in self.player._avatars:
+            print('{} MOVES: {}'.format(avatar.name, avatar.moves))
 
     def load_player(self):
         '''Creates the player or if already exists,reset the avatars location'''
@@ -44,6 +52,7 @@ class Game(object):
             agent.dispatcher.push_handlers(self)
         for avatar in self.player._avatars:
             avatar.dispatcher.push_handlers(self)
+        self.player.dispatcher.remove_handlers(self)
         self.player.dispatcher.push_handlers(self)
 
     def remove_dead(self, group):
@@ -70,6 +79,7 @@ class Game(object):
         self.player.update(self.turn_side, dt)
         for agent in self.agents:
             if self.turn_side == agent.side:
+                print('{} takes action'.format(agent.name))
                 agent.take_action()
             agent.update(dt)
         if self.turn_side == 'evil':
@@ -105,16 +115,19 @@ class Game(object):
         self.animations.append(animation)
 
     def reset_turn(self):
-        print('reset turn')
+        print('\n\n****************\nRESET TURN********')
+
         self.turn += 1
         if self.turn_side == 'evil':
             self.turn_side = 'good'
         else:
             self.turn_side = 'evil'
-        print(self.turn_side)
+        print('\nTURN {} {}\n'.format(self.turn, self.turn_side))
         self.display_notifications(['Turn of the {} guys'.format(self.turn_side)])
         for agent in self.agents + list(self.player._avatars):
             agent.reset_moves()
+
+        self.check_moves()
 
     def player_event(self, event_type):
         print('\nplayer event: {}\n'.format(event_type[0]))
