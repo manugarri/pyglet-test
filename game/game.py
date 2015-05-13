@@ -39,10 +39,13 @@ class Game(object):
         '''Creates the player or if already exists,reset the avatars location'''
         player_x, player_y = self.level.find('entrance')
         if hasattr(self,'player'):
+            self.player.load_avatars(avatars=self.level.avatars, x=player_x, y=player_y, level=self.level, batch=main_batch)
+            '''
             for avatar in self.player._avatars:
                 avatar.pos_x = player_x
                 avatar.pos_y = player_y
                 avatar.level = self.level
+                '''
         else:
             player = Player(avatars=self.level.avatars, x=player_x, y=player_y, level=self.level, batch=main_batch)
             self.player = player
@@ -79,7 +82,6 @@ class Game(object):
         self.player.update(self.turn_side, dt)
         for agent in self.agents:
             if self.turn_side == agent.side:
-                print('{} takes action'.format(agent.name))
                 agent.take_action()
             agent.update(dt)
         if self.turn_side == 'evil':
@@ -126,8 +128,6 @@ class Game(object):
         self.display_notifications(['Turn of the {} guys'.format(self.turn_side)])
         for agent in self.agents + list(self.player._avatars):
             agent.reset_moves()
-
-        self.check_moves()
 
     def player_event(self, event_type):
         print('\nplayer event: {}\n'.format(event_type[0]))

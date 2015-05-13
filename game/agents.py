@@ -1,5 +1,6 @@
 import time
 from collections import deque
+from math import sqrt, pow
 
 import pyglet
 from pyglet.window import key
@@ -9,7 +10,8 @@ from constants import LEVEL_ROWS, LEVEL_COLUMNS
 
 def agents_distance(x1,y1, x2, y2):
     '''returns the distance (in legal movements) between two elements in the level'''
-    return abs(x1-x2) + abs(y1-y2)
+    #return abs(x1-x2) + abs(y1-y2)
+    return sqrt(pow(x1-x2,2)+pow(y1-y2,2))
 
 class Agent(VisibleElement):
     #Basic Agent class
@@ -146,16 +148,47 @@ class BasicMob(ActiveAgent):
         '''the mob moves to the nearest avatar.
         If there is one next to it, the mob attacks'''
         target, distance = self.find_nearest_enemy()
+        print('{} moves ({} moves left) distance: {}'.format(self.name, self.moves - 1, distance))
         if distance <= 1:
             attacked = self.attack_enemy()
             if attacked:
                 return None
+        '''
         for direction in ['left','right','up','down']:
             valid_move, to_x, to_y = self.valid_move(direction)
             if valid_move and agents_distance(to_x, to_y, target.pos_x, target.pos_y) < \
                     agents_distance( self.pos_x, self.pos_y, target.pos_x, target.pos_y):
                 eval('self.move_{}()'.format(direction))
                 return None
+        '''
+
+        def get_movements():
+            ''' for each direction, calculate the distance.
+            for the minimum direction:
+                return the direction name, the to_x and to_y
+            '''
+            directions = ['left','right','up','down']
+            movements = []
+            for direction in directions:
+                valid_move, to_x, to_y = self.valid_move(direction)
+                distance = agents_distance(to_x, to_y, target.pos_x, target.pos_y)
+                movements.append([direction, distance, valid_move, to_x, to_y])
+            movements = sorted(movements, key=lambda x: x[1])
+            return movements
+
+        movements = get_movements()
+        for movement in movements:
+            if movement[2] and movement[1]< distance:
+                eval('self.move_{}()'.format(movement[0]))
+                return None
+
+        #should move tangential if no direct move is available
+        if distance > 1:
+            for movement in movements:
+                if movement[2]:
+                    eval('self.move_{}()'.format(movement[0]))
+                    return None
+
         #change orientation when mob is next to avatar
         if target.pos_y > self.pos_y:
             self.move_up()
@@ -188,11 +221,22 @@ class Player(object):
     '''The player basic character'''
     def __init__(self, avatars, *args, **kwargs):
         self.key_handler = key.KeyStateHandler()
+        self.load_avatars(avatars, *args, **kwargs)
+        self.dispatcher = pyglet.event.EventDispatcher()
+        self.dispatcher.register_event_type('player_event')
+
+    def load_avatars(self, avatars, *args, **kwargs):
+
+        try:
+            if hasattr(self,'_avatars'):
+                for old_avatar in self._avatars:
+                    old_avatar.delete()
+        except Exception as e:
+            print(e)
+
         self._avatars = [AVATARS_CLASSES[avatar](*args, **kwargs) for avatar in avatars]
         self._avatars = deque(self._avatars)
         self.avatar = self._avatars[0]
-        self.dispatcher = pyglet.event.EventDispatcher()
-        self.dispatcher.register_event_type('player_event')
 
     def sleep(self):
         time.sleep(0.1)
