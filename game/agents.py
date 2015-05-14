@@ -266,7 +266,8 @@ class Player(object):
             print('\nkey enter pressed\n')
             self.sleep()
             self.dispatcher.dispatch_event('player_event', ['end_turn'])
-        self.avatar.update(dt)
+        if self.avatar:
+            self.avatar.update(dt)
         self.check_position()
 
     def check_position(self):
@@ -311,6 +312,17 @@ class Goblin(BasicMob):
         self.turn_moves = 3
         self.power = 1
 
+class Orc(BasicMob):
+    '''A grunt.'''
+    def __init__(self, *args, **kwargs):
+        super(Orc, self).__init__(img=AGENT_IMAGES['orc'], *args, **kwargs)
+        self.name = 'Orc'
+        self.health = 5
+        self.turn_moves = 3
+        self.power = 2
+
+
+
 class Chest(ActiveAgent):
     '''A chest'''
     def __init__(self, *args, **kwargs):
@@ -320,7 +332,8 @@ class Chest(ActiveAgent):
 
 AGENTS_CLASSES = {
 'chest': Chest,
-'goblin': Goblin
+'goblin': Goblin,
+'orc': Orc
     }
 
 AVATARS_CLASSES = {

@@ -1,5 +1,4 @@
 import pyglet
-import time
 
 from load import foreground
 from constants import TILE_SIZE
@@ -28,6 +27,7 @@ AGENT_IMAGES = {
  'knight': i('knight.png'),
  'peasant': i('peasant.png'),
  'goblin': i('goblin.png'),
+ 'orc': i('orc.png'),
  'chest': i('chest.png')
 }
 

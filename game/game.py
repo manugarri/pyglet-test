@@ -1,4 +1,5 @@
 import time
+from collections import deque
 
 import pyglet
 
@@ -23,11 +24,22 @@ class Game(object):
         self.turn_side = 'evil' #good guys start first
         self.animations = []
         self.level = Level(self.level_number, level_batch)
-        self.agents = self.level.load_agents(AGENTS_CLASSES, main_batch)
+        #self.agents = self.level.load_agents(AGENTS_CLASSES, main_batch)
+        self.load_agents()
         self.load_player()
         self.register_dispatchers()
         self.level_number +=1
         self.reset_turn()
+
+    def load_agents(self):
+        if hasattr(self, 'agents'):
+            for agent in self.agents:
+                print('delete {}'.format(agent))
+                agent.delete()
+                #del agent
+                #self.agents.pop(i)
+            del self.agents
+        self.agents = self.level.load_agents(AGENTS_CLASSES, main_batch)
 
     def check_moves(self):
         for agent in self.agents:
@@ -65,6 +77,17 @@ class Game(object):
                 self.display_notifications(['{} was killed'.format(agent.name)])
                 agent.delete()
                 self.agents.pop(i)
+        frozen_avatars = list(self.player._avatars)
+        for i, avatar in enumerate(frozen_avatars):
+            if avatar.health<=0:
+                self.display_notifications(['{} was killed'.format(agent.name)])
+                avatar.delete()
+                frozen_avatars.pop(i)
+        self.player._avatars = deque(frozen_avatars)
+
+        if len(self.player._avatars) <= 0:
+                self.level_number = 0
+                self.load_level()
 
     def update(self, dt):
         if self.turn_side == 'good':
