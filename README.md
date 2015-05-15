@@ -23,10 +23,11 @@ Very basic game. With basic rule:
 3. If all of your avatars die, the game restarts.
 
 ###Controls:
-<kbd>w</kbd> Move up
-<kbd>s</kbd> Move down
-<kbd>a</kbd> Move left
-<kbd>f</kbd> Move right
-<kbd>a</kbd> Attack
-<kbd>Space</kbd> Alternate avatars
-<kbd>Enter</kbd> End Turn
+
+* <kbd>w</kbd> Move up
+* <kbd>s</kbd> Move down
+* <kbd>a</kbd> Move left
+* <kbd>f</kbd> Move right
+* <kbd>a</kbd> Attack
+* <kbd>Space</kbd> Alternate avatars
+* <kbd>Enter</kbd> End Turn
