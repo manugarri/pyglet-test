@@ -267,7 +267,10 @@ class Player(object):
             self.sleep()
             self.dispatcher.dispatch_event('player_event', ['end_turn'])
         if self.avatar:
-            self.avatar.update(dt)
+            try:
+                self.avatar.update(dt)
+            except AttributeError:
+                self.change_avatar()
         self.check_position()
 
     def check_position(self):

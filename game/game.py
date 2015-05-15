@@ -86,7 +86,7 @@ class Game(object):
         self.player._avatars = deque(frozen_avatars)
 
         if len(self.player._avatars) <= 0:
-                self.level_number = 0
+                self.level_number -= 1 #load_level increments a level and we want to reload the current one
                 self.load_level()
 
     def update(self, dt):
