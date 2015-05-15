@@ -31,3 +31,6 @@ Very basic game. With basic rule:
 * <kbd>a</kbd> Attack
 * <kbd>Space</kbd> Alternate avatars
 * <kbd>Enter</kbd> End Turn
+
+<hr>
+**Note:** Tokens taken from [Devins token Site](http://immortalnights.com/tokensite/)
